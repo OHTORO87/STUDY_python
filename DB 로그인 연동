@@ -1,0 +1,115 @@
+# DB와 연동해서 파이썬에서 로그인 기능 구현하기
+
+""" 추가 로그인 기능 """
+# 제한횟수 3번 
+# 회원가입 
+
+
+import pymysql
+
+conn = pymysql.connect(host='localhost', user = 'root', password='8924', db='login', charset='utf8')
+cursor = conn.cursor()
+
+# 로그인 실패 횟수
+cnt = 0
+
+try :
+    while True:
+
+        # ID, PW 입력받기
+        id = input('ID 입력:')
+        pw = input('PW 입력:')
+
+        # DB에서 ID가 있는지 확인
+        sql = "SELECT EXISTS (SELECT * FROM client WHERE id = %s) AS SUCCESS"
+        cursor.execute(sql,(id))
+        result = cursor.fetchone() # result는 tuple, result[0]는 int
+
+        if result[0] == 1:
+
+            # DB의 (ID, PWD)와 input값 비교
+            sql = "SELECT id,pw FROM client WHERE id = %s"
+            cursor.execute(sql,(id))
+            result = cursor.fetchone() 
+            if result[0] == id and result[1] == pw:
+                print('\n로그인 성공!')
+                break            
+            else :
+                cnt += 1
+                print("******** 로그인 3회 실패 시 자동 종료됩니다 ********")
+                print(f'로그인 {cnt}회 실패')
+                print("****************************************************","\n")
+            
+            if cnt >= 3:
+                print("보안을 위해 로그인 시스템을 종료합니다!")
+                break
+
+        else:
+            print("\n##################################")
+            print("ID가 존재하지 않습니다!!")
+            print("##################################","\n")
+            
+            # Mini 회원가입 기능
+            ans = input("아이디를 만드시겠습니까? [y/n]:")
+            while True:
+                if ans == 'y':
+                    tmp1 = input("I D: >>>")
+                    tmp2 = input("PWD: >>>")
+
+                    # DB(ID,PWD)에 실수로 공백이 들어가는 것을 방지
+                    if tmp1 == '':
+                        print("\n만드실 ID를 입력하지 않았습니다.")
+                        print("다시 입력해주세요!")
+                        continue
+
+                    if tmp2 == '':
+                        print("\n만드실 Password를 입력하지 않았습니다.")
+                        print("다시 입력해주세요!")
+                        continue
+                    
+                    # DB에 넣어주기
+                    sql = "INSERT INTO client(id,pw) VALUES(%s, %s)"
+                    cursor.execute(sql,(tmp1, tmp2))
+                    conn.commit()
+
+                    # 제대로 들어갔는지 확인
+                    sql = "SELECT * FROM client WHERE id = %s"
+                    cursor.execute(sql,tmp1)
+                    check_DB = cursor.fetchone()
+                    print("######################################")
+                    print(f"ID:{check_DB[1]}, PWD:{check_DB[2]}\n")
+                    print("회원가입이 정상적으로 완료되었습니다!")
+                    print("######################################\n")
+                    break
+                
+                else:
+                    print("\n시스템을 종료합니다!")
+                    
+                    # 이중 LOOP를 탈출하기 위해서 일부러 에러 만들기
+                    raise NotImplementedError
+                    
+
+except NotImplementedError as e:
+    print("----------------------------------")
+    print("시스템 종료...")
+    print("----------------------------------")
+
+except Exception as e:
+    print("############ 에러발생 ############")
+    print(type(e))
+    print(e)
+    print("##################################")
+
+finally:
+    conn.close()
+
+
+"""Reference"""
+# # 기본 로그인 코드
+# https://oceancoding.blogspot.com/2019/09/blog-post.html
+
+# # 이중 Loop 탈출
+# https://gomguard.tistory.com/190
+
+# # Delete Multiple rows
+# https://www.tutorialspoint.com/How-can-we-delete-multiple-rows-from-a-MySQL-table
