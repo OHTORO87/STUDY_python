@@ -1,0 +1,42 @@
+show databases;
+
+create DATABASE login;
+
+use login;
+
+show tables;
+
+desc client;
+
+
+select * from client;
+
+-- 새로운 테이블 생성 --
+CREATE TABLE client(pnum int primary key auto_increment, id char(10), pw char(10));
+
+-- clent 테이블의 id 필드에 primary key 속성 부여 --
+ alter table client drop primary key(id);
+
+-- PK 속성을 없애기 --
+ alter table client drop primary key;
+
+
+-- 컬럼 순서 바꾸기(다른컬럼 다음으로)--
+ALTER TABLE 테이블명 MODIFY COLUMN 컬럼명 자료형 AFTER 다른컬럼;
+-- 컬럼 순서 바꾸기(원하는 것을 제일 처음으로)--
+ALTER TABLE client MODIFY COLUMN pnum int FIRST;
+-- 클라이언트 테이블에서 pk 삭제 --
+alter table client drop primary key;
+-- 원하는 컬럼에 pk속성을 부여 --
+alter TABLE client add(pnum int primary key auto_increment);
+
+insert into client(id, pw) values('oh1234','1234oh');
+insert into client(id, pw) values('woo1234','1234woo');
+insert into client(id, pw) values('kim1234','1234kim');
+insert into client(id, pw) values('choi1234','1234choi');
+insert into client(id, pw) values('park1234','1234park');
+
+alter table client modify id varchar(50);
+alter table client modify pw varchar(50);
+
+drop table clinet;
